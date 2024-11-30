@@ -17,3 +17,13 @@ def env():
     value = os.environ.get('ENV_VALUE')
 
     return {'value': value}, 200
+
+@app.route('/creds', methods=['GET'])
+
+def creds():
+    values = dict()
+
+    values['secure'] = open("/run/secrets/token", "r").read()
+    values['insecure'] = os.environ.get('ENV_TOKEN')
+
+    return values, 200
