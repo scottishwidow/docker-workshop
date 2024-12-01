@@ -23,7 +23,7 @@ def env():
 def creds():
     values = dict()
 
-    # values['secure'] = open("/run/secrets/token", "r").read()
+    values['secure'] = open("/run/secrets/secret-1", "r").read()
     values['insecure'] = os.environ.get('ENV_TOKEN')
 
     return values, 200

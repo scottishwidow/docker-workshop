@@ -1,0 +1,17 @@
+---
+services:
+  flask:
+    image: scottishwidow/flask:latest
+    build:
+      context: flask
+      dockerfile: Dockerfile
+    ports:
+      - 7070:5000
+    secrets:
+      - secret-1
+    environment:
+      - ENV_VALUE=${ENV_VALUE}
+      - APP_TOKEN=${ENV_TOKEN}
+secrets:
+  secret-1:
+    file: ./secrets/secret-1
