@@ -1,4 +1,6 @@
-FROM node:22-bullseye-slim
+FROM node:22-alpine
+
+RUN apk --no-cache add curl
 
 WORKDIR /app
 

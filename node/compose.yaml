@@ -1,0 +1,28 @@
+---
+services:
+  api:
+    image: scottishwidow/api:latest
+    restart: always
+    build:
+      context: src
+      dockerfile: Dockerfile
+    ports:
+      - 7070:3000
+    secrets:
+      - pg-password
+    environment:
+      - ENV_VALUE
+      - ENV_TOKEN
+      - DB_HOST
+      - DB_DATABASE
+      - DB_USER
+    volumes:
+      - api-data:/data
+
+secrets:
+  pg-password:
+    file: ./secrets/pg-password
+
+volumes:
+  api-data:
+
