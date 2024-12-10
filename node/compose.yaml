@@ -19,20 +19,28 @@ services:
     volumes:
       - api-data:/data
       # - ./src/data:/data
-  
+    depends_on:
+      postgres:
+        condition: service_healthy
+ 
   postgres:
     image: postgres:16
     restart: always
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=scottishwidow
-      - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD_FILE=/run/secrets/pg-password
+      - POSTGRES_USER
+      - POSTGRES_DB
+      - POSTGRES_PASSWORD_FILE
     secrets:
       - pg-password
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
 
 secrets:
   pg-password:
