@@ -1,5 +1,5 @@
 const express = require('express');
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
@@ -10,25 +10,21 @@ const app = express();
 app.use(express.json());
 
 // let pool;
-// try {
-//     const dbHost = process.env.DB_HOST;
-//     const dbDatabase = process.env.DB_DATABASE;
-//     const dbUser = process.env.DB_USER;
-//     const dbPassword = fs.readFileSync('/run/secrets/pg-password', 'utf-8').trim();
+// (async () => {
+//     try {
+//         const dbHost = process.env.DB_HOST;
+//         const dbDatabase = process.env.DB_DATABASE;
+//         const dbUser = process.env.DB_USER;
+//         const dbPassword = (await fs.readFile('/run/secrets/pg-password', 'utf-8')).trim();
 //
-//     pool = new Pool({
-//         host: dbHost,
-//         database: dbDatabase,
-//         user: dbUser,
-//         password: dbPassword,
-//     });
+//         pool = new Pool({
+//             host: dbHost,
+//             database: dbDatabase,
+//             user: dbUser,
+//             password: dbPassword,
+//         });
 //
-//     pool.connect(async (err, client, release) => {
-//         if (err) {
-//             console.error('Failed to connect to the database:', err);
-//             throw err;
-//         }
-//
+//         const client = await pool.connect();
 //         console.info('Successfully connected to the database.');
 //
 //         await client.query(`
@@ -37,34 +33,33 @@ app.use(express.json());
 //                 content TEXT NOT NULL
 //             )
 //         `);
-//         release();
-//     });
-// } catch (err) {
-//     console.error('Database connection error:', err);
-// }
-
+//         client.release();
+//     } catch (err) {
+//         console.error('Database connection error:', err);
+//     }
+// })();
 
 app.get('/healthz', (req, res) => {
-    res.status(200).json({ healthz: 'Application is running!!!' });
+    res.status(200).json({ healthz: 'Application is running!' });
 });
 
 app.route('/volumes')
-    .get((req, res) => {
+    .get(async (req, res) => {
         const filename = '/data/test';
 
         try {
-            const content = fs.readFileSync(filename, 'utf-8');
+            const content = await fs.readFile(filename, 'utf-8');
             res.status(200).send(content);
         } catch (err) {
             res.status(404).send('File not found');
         }
     })
-    .post((req, res) => {
+    .post(async (req, res) => {
         const filename = '/data/test';
 
         try {
-            fs.mkdirSync(path.dirname(filename), { recursive: true });
-            fs.writeFileSync(filename, 'Customer record');
+            await fs.mkdir(path.dirname(filename), { recursive: true });
+            await fs.writeFile(filename, 'Customer record');
             res.status(201).send('Saved!');
         } catch (err) {
             res.status(500).send('Failed to save file');
