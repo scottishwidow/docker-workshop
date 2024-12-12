@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - 7070:3000
-    secrets:
-      - pg-password
     environment:
       - ENV_VALUE
       - ENV_TOKEN
