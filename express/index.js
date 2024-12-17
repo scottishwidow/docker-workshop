@@ -40,7 +40,7 @@ app.use(express.json());
 // })();
 
 app.get('/healthz', (req, res) => {
-    res.status(200).json({ healthz: 'Application is running!' });
+    res.status(200).json({ healthz: 'Application is running in development mode for the second time!' });
 });
 
 app.route('/volumes')
