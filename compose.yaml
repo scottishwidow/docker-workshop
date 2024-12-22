@@ -1,9 +1,21 @@
 ---
 services:
+  nginx:
+    image: nginx:1.26.2-alpine-slim
+    restart: always
+    ports:
+      - 80:80
+    networks:
+      - public
+    configs:
+      - source: nginx
+        target: /etc/nginx/nginx.conf
+
   postgres:
     image: postgres:16
-    ports:
-      - 5432:5432
+    restart: always
+    # ports:
+    #   - 5432:5432
     secrets:
       - pg-password
     environment:
@@ -12,6 +24,8 @@ services:
       - POSTGRES_PASSWORD_FILE=/run/secrets/pg-password
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - private
 
   api:
     image: node-api:latest
@@ -19,8 +33,8 @@ services:
     build:
       context: express
       dockerfile: Dockerfile.prod
-    ports:
-      - 3000:3000
+    # ports:
+    #   - 3000:3000
     environment:
       - ENV_VALUE
       - ENV_TOKEN
@@ -31,6 +45,9 @@ services:
       - api-data:/data
     secrets:
       - pg-password
+    networks:
+      - private
+      - public
 
 volumes:
   api-data:
@@ -39,3 +56,18 @@ volumes:
 secrets:
   pg-password:
     file: ./secrets/pg-password
+
+networks:
+  public:
+  private:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "10.0.0.0/24"
+          gateway: "10.0.0.1"
+
+configs:
+  nginx:
+    file: ./nginx.conf
+
+
