@@ -4,10 +4,12 @@ services:
     image: postgres:16
     ports:
       - 5432:5432
+    secrets:
+      - pg-password
     environment:
       - POSTGRES_USER=node
       - POSTGRES_DB=postgres
-      - POSTGRES_PASSWORD=secret12345
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg-password
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
@@ -22,8 +24,18 @@ services:
     environment:
       - ENV_VALUE
       - ENV_TOKEN
+      - DB_HOST=postgres
+      - DB_USER=node
+      - DB_DATABASE=postgres
     volumes:
       - api-data:/data
+    secrets:
+      - pg-password
+
 volumes:
   api-data:
   postgres-data:
+
+secrets:
+  pg-password:
+    file: ./secrets/pg-password
