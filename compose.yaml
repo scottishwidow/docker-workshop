@@ -16,16 +16,14 @@ services:
     restart: always
     build:
       context: express
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     ports:
       - 3000:3000
     environment:
       - ENV_VALUE
       - ENV_TOKEN
     volumes:
-      # - api-data:/data
-      - ./express:/app
-
+      - api-data:/data
 volumes:
-  # api-data:
+  api-data:
   postgres-data:
