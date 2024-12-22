@@ -2,3 +2,4 @@
 .git
 Dockerfile
 Dockerfile.dev
+node_modules/
