@@ -47,7 +47,7 @@ resource "aws_instance" "node_api_host" {
 
   provisioner "remote-exec" {
     inline = [
-      "while ! systemctl is-active --quiet docker; do sleep 5; done"
+      "echo 'Wait until SSH is ready'"
     ]
 
     connection {
