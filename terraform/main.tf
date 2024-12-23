@@ -37,8 +37,8 @@ resource "aws_instance" "node_api_host" {
   ami = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"  
   associate_public_ip_address = true
-  security_groups = [aws_security_group.node_api_sg.id]
   key_name = "k.michael"
+  security_groups = [ aws_security_group.node_api_sg.name ]
 
   root_block_device {
     volume_size = 15
