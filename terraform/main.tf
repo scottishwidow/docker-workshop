@@ -2,39 +2,63 @@ resource "aws_security_group" "node_api_sg" {
   name        = "node-api-sg"
   description = "Nodejs API security group"
   vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port = 443
+    to_port = 443
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
-  security_group_id = aws_security_group.node_api_sg.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 22
-  ip_protocol       = "tcp"
-  to_port           = 22
-}
-
-resource "aws_vpc_security_group_ingress_rule" "allow_http" {
-  security_group_id = aws_security_group.node_api_sg.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 80
-  ip_protocol       = "tcp"
-  to_port           = 80
-}
-
-resource "aws_vpc_security_group_ingress_rule" "allow_tls" {
-  security_group_id = aws_security_group.node_api_sg.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 443
-  ip_protocol       = "tcp"
-  to_port           = 443
-}
-
-resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
-  security_group_id = aws_security_group.node_api_sg.id
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "-1" 
-}
 
 resource "aws_instance" "node_api_host" {
   ami = data.aws_ami.ubuntu.id
   instance_type = "t2.micro"  
+  associate_public_ip_address = true
+  security_groups = [aws_security_group.node_api_sg.id]
+  key_name = "k.michael"
+
+  root_block_device {
+    volume_size = 15
+    volume_type = "gp2"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "while ! systemctl is-active --quiet docker; do sleep 5; done"
+    ]
+
+    connection {
+      type = "ssh"
+      user = local.ssh_user
+      private_key = file(var.private_key_path)
+      host = aws_instance.node_api_host.public_ip
+    } 
+  }
+
+  provisioner "local-exec" {
+    command = "ansible-playbook -i ${aws_instance.node_api_host.public_ip}, --private-key ${var.private_key_path} ./ansible/docker.yaml"
+  }
 }
